@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:gravity="center"
+     android:padding="8dip"
+     >
+    
+    <ImageView 
+        android:layout_width="@dimen/avatar_width"
+     	android:layout_height="@dimen/avatar_height"
+     	android:layout_alignParentLeft="true"
+     	android:id="@+id/userAvatar"
+     	android:scaleType="fitXY"
+     	android:src="@drawable/default_avatar"
+     	android:layout_marginRight="8dip"
+        />
+    <TextView 
+        android:id="@+id/time"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="111"
+        android:layout_marginRight="8dp"
+        />
+    <LinearLayout
+        android:id="@+id/layout"
+        android:layout_toRightOf="@id/userAvatar"
+        android:layout_toLeftOf="@id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" >
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="用户名"
+                android:textColor="@color/black"
+                android:textSize="@dimen/medium_text" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="("
+                android:textColor="@color/text"
+                android:textSize="@dimen/medium_text" />
+            
+            <TextView
+                android:id="@+id/userID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="用户ID"
+                android:textColor="@color/text"
+                android:textSize="@dimen/medium_text" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text=")"
+                android:textColor="@color/text"
+                android:textSize="@dimen/medium_text" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/userRecentMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:singleLine="true"
+            android:text="最近的话"
+            android:textColor="@color/text"
+            android:textSize="@dimen/medium_text" />
+        
+    </LinearLayout>
+    
+    
+</RelativeLayout>

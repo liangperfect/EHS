@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" 
+    android:descendantFocusability="blocksDescendants"
+    android:background="@color/title_sliver">
+	<ImageView 
+	    android:id="@+id/game_img"
+	    android:layout_width="100px"
+	    android:layout_height="74px"
+	    />
+	  <TextView 
+	      android:id="@+id/game_info"
+	      android:layout_width="wrap_content"
+	      android:layout_height="50px"
+	      android:textColor="@android:color/black"
+	      android:layout_gravity="center_vertical"
+	      />
+
+</LinearLayout>

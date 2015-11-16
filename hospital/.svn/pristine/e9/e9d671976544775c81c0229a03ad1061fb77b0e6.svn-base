@@ -1,0 +1,107 @@
+package com.example.ehs.im;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import com.example.ehs.R;
+
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class PictureActivity extends Activity implements OnClickListener{
+	private Button backView;
+	private TextView titleView;
+	private ImageView pictureView;
+	private Button saveView;
+	private int isSave=0;//为0表示未保存，为1表示以存储
+	Bitmap bitmap=null;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.picture);
+		bitmap = (Bitmap) this.getIntent().getExtras().get("pic");
+		init();
+	}
+
+	private void init() {
+		backView = (Button)findViewById(R.id.bt_left);
+		backView.setVisibility(View.VISIBLE);
+		backView.setOnClickListener(this);
+		
+		titleView = (TextView)findViewById(R.id.title);
+		titleView.setText("图片预览");
+		
+		pictureView  = (ImageView)findViewById(R.id.picture);
+		if(bitmap!=null){
+			pictureView.setImageBitmap(bitmap);
+		}else{
+			Toast.makeText(this, "图片文件为空，没有预览！", Toast.LENGTH_SHORT).show();
+		}
+		pictureView.setOnClickListener(this);
+		
+		saveView = (Button)findViewById(R.id.save_pic);
+		saveView.setOnClickListener(this);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_left:
+			this.finish();
+			break;
+		case R.id.picture:
+			this.finish();
+			break;
+		case R.id.save_pic:
+			Toast.makeText(this, "保存中！", Toast.LENGTH_SHORT).show();
+			if(isSave==0){
+				int i = savePic();
+			}else{
+				Toast.makeText(this, "该图片已经保存！", Toast.LENGTH_SHORT).show();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	private int savePic() {
+		int i=0;
+		File SAVE_PHOTO_DIR = new File(Environment.getExternalStorageDirectory() + "/EHS/pictures");
+		System.out.println("path="+SAVE_PHOTO_DIR);
+		File file=null;
+		Date date = new Date(System.currentTimeMillis());   
+        SimpleDateFormat dateFormat = new SimpleDateFormat("'IMG'_yyyyMMdd_HHmmss");   
+        String fileName=dateFormat.format(date) + ".jpg";
+		file = new File(SAVE_PHOTO_DIR,fileName); 
+		try {   
+			file.createNewFile();   
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
+			bos.flush();
+			bos.close();
+			if(file.exists()){
+				Toast.makeText(this, "图片保存成功！", Toast.LENGTH_SHORT).show();
+				i=1;
+			}
+		} catch (IOException e) {   
+			e.printStackTrace();   
+		}   
+		return i;
+	}
+
+}

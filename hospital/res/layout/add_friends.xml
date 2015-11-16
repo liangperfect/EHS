@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+   <include 
+         android:id="@+id/add_title"
+        layout="@layout/title_activity"
+        />
+   <com.example.ehs.widget.My2TextButton  
+         android:id="@+id/add_friend"
+         android:layout_width="fill_parent"
+         android:layout_height="60dp"
+         android:layout_marginTop="20dp"
+         android:layout_marginLeft="8dp"
+         android:layout_marginRight="8dp"
+         android:background="@drawable/bg_input_top"/>
+   <View 
+		android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:background="@drawable/divider_input"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"/>	   
+	 <com.example.ehs.widget.My2TextButton
+         android:id="@+id/add_group"
+         android:layout_width="fill_parent"
+         android:layout_height="60dp"
+         android:layout_marginLeft="8dp"
+         android:layout_marginRight="8dp"
+         android:background="@drawable/bg_input_bottom"/>  
+
+</LinearLayout>

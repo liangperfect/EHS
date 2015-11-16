@@ -1,0 +1,746 @@
+package com.example.ehs.im;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.filetransfer.FileTransfer;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
+
+import com.example.ehs.R;
+import com.example.ehs.model.Friends;
+import com.example.ehs.model.IMMessage;
+import com.example.ehs.utils.ConnectionUtils;
+import com.example.ehs.utils.ExpressionUtil;
+import com.example.ehs.widget.FileDialog;
+import com.example.ehs.xmpphelper.AChatActivity;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextWatcher;
+import android.text.format.DateFormat;
+import android.text.style.ImageSpan;
+import android.view.Gravity;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+/*
+ * 聊天界面
+ * */
+public class ChatActivity extends AChatActivity implements OnClickListener{
+	
+    ListView listView = null;
+    List<Map<String, Object>> list;
+    IMMessage message ;
+    String style=null;
+    String name=null;
+    Friends friends=null;
+    
+    private TextView titleView;//标题
+    private Button messageView;//返回消息界面
+    private Button imgView;//好友信息
+    
+    private ImageView bqView;//表情
+    private ImageView addView;//发送方式
+    private EditText chatInputView;//文字输入
+    private Button speakView;//按住说话
+    private Button chatSendView;//语音、键盘按钮
+    
+    private MessageListAdapter adapter = null;
+    
+    private int[] imageIds = new int[107];//表情ID
+	private Dialog builder; //表情弹出框
+	
+	private int input_type=0;//输入方式  INPUT_TYPE:0---文字输入，1---语音输入
+    /* 请求码*/
+    private static final int IMAGE_REQUEST_CODE = 0;
+    private static final int CAMERA_REQUEST_CODE = 1;
+    private static final int FILE_RESULT_CODE = 2;
+    
+    ByteArrayOutputStream stream=null;
+    String filename=null;
+    
+	@Override
+	protected void onCreate(Bundle savedInstanceState){
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.chat);
+		Bundle b = getIntent().getBundleExtra("info");
+		style = b.getString("style");
+		friends = b.getParcelable("friends");
+		name = friends.getJID();
+		System.out.println("style="+style);
+		System.out.println("name="+name);
+	    setupView();
+	}
+	private void setupView() {
+    	listView = (ListView) findViewById(R.id.chatlist);
+    	
+    	titleView = (TextView)this.findViewById(R.id.title);
+    	titleView.setText(name);
+    	
+    	adapter = new MessageListAdapter(ChatActivity.this, getMessages(),listView);
+		listView.setAdapter(adapter);
+		
+    	messageView = (Button)findViewById(R.id.bt_left);
+    	messageView.setVisibility(View.VISIBLE);
+    	messageView.setOnClickListener(this);
+    	
+    	imgView = (Button)findViewById(R.id.bt_right);
+    	imgView.setVisibility(View.VISIBLE);
+    	imgView.setOnClickListener(this);
+    	
+    	bqView = (ImageView)findViewById(R.id.chat_bq);
+    	bqView.setOnClickListener(this);
+    	
+    	addView = (ImageView)findViewById(R.id.chat_add);
+    	addView.setOnClickListener(this);
+    	
+    	//
+    	chatInputView = (EditText)findViewById(R.id.chat_input);
+    	//chatInputView.setOnClickListener(this);
+    	
+    	
+    	
+    	speakView = (Button)findViewById(R.id.chat_speak);
+    	//speakView.setOnClickListener(this);
+    	
+    	chatSendView = (Button)findViewById(R.id.chat_send);
+    	//每次进来都是默认文字输入
+    	input_type = 0;   
+    	chatSendView.setText("语音");
+    	chatSendView.setOnClickListener(this);
+    	
+    	chatInputView.addTextChangedListener(new TextWatcher() {		
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				
+			}
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+					int arg3) {
+				
+			}
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				String content = chatInputView.getText().toString();
+				if(content.length()>0){
+					input_type = 2;
+					chatSendView.setText("发送");
+				}else{
+					input_type = 0;
+					chatSendView.setText("语音");
+				}
+			}
+		});
+    }
+
+
+	@Override
+	protected void receiveNewMessage(IMMessage message) {
+		
+	}
+	@Override
+	protected void refreshMessage(List<IMMessage> messages) {
+		adapter.refreshList(messages);
+	}
+	
+	
+	private class MessageListAdapter extends BaseAdapter {
+
+		private List<IMMessage> items;
+		private Context context;
+		private ListView adapterList;
+
+		public MessageListAdapter(Context context, List<IMMessage> items,
+				ListView adapterList) {
+			this.context = context;
+			this.items = items;
+			this.adapterList = adapterList;
+		}
+
+		public void refreshList(List<IMMessage> items) {
+			this.items = items;
+			this.notifyDataSetChanged();
+			adapterList.setSelection(items.size() - 1);
+		}
+
+		@Override
+		public int getCount() {
+			return items.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return items.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			IMMessage message = items.get(position);
+			TextView timeView=null;
+			ImageView avaterView=null;
+			TextView contentView=null;
+			ImageView conImageView=null;
+			View  view1=null;
+			//接收的信息
+			if(style.equals("from")){
+				if(message.isNews()){
+					view1 = ChatActivity.this.getLayoutInflater().inflate(R.layout.item_news, null);//新闻
+					timeView = (TextView)view1.findViewById(R.id.newsTime);//新闻发送 时间
+					avaterView = (ImageView) view1.findViewById(R.id.newsIcon);//新闻发送者图标
+					contentView = (TextView)view1.findViewById(R.id.newsTitle);//新闻标题
+					conImageView = (ImageView)view1.findViewById(R.id.newsImg);//图片
+				}else{
+					view1 = ChatActivity.this.getLayoutInflater().inflate(R.layout.item_message, null);//消息
+					timeView = (TextView)view1.findViewById(R.id.messageTime);//消息发送 时间
+					avaterView = (ImageView) view1.findViewById(R.id.senderAvatar);//消息发送者头像
+					contentView = (TextView)view1.findViewById(R.id.messageContent);//消息内容
+					conImageView = (ImageView)view1.findViewById(R.id.messageImg);//图片
+				}
+			}else{//发送消息
+				//如果是接收的消息，接受的消息显示在左边
+				if (message.getFromSubJid() != null && message.getMsgType() != 1){
+					System.out.println("接收消息");
+					view1 = ChatActivity.this.getLayoutInflater().inflate(R.layout.item_message, null);//消息
+					timeView = (TextView)view1.findViewById(R.id.messageTime);//消息发送 时间
+					avaterView = (ImageView) view1.findViewById(R.id.senderAvatar);//消息发送者头像
+					contentView = (TextView)view1.findViewById(R.id.messageContent);//消息内容
+					contentView.setBackgroundResource(R.drawable.balloon_l_selector);
+					conImageView = (ImageView)view1.findViewById(R.id.messageImg);
+					conImageView.setBackgroundResource(R.drawable.balloon_l_selector);
+				}else{//发送的消息显示在右边
+					System.out.println("发送消息");
+					view1 = ChatActivity.this.getLayoutInflater().inflate(R.layout.item_news, null);//新闻
+					timeView = (TextView)view1.findViewById(R.id.newsTime);//新闻发送 时间
+					avaterView = (ImageView) view1.findViewById(R.id.newsIcon);//新闻发送者图标
+					contentView = (TextView)view1.findViewById(R.id.newsTitle);//新闻标题
+					contentView.setBackgroundResource(R.drawable.balloon_r_selector);
+					conImageView = (ImageView)view1.findViewById(R.id.newsImg);
+					conImageView.setBackgroundResource(R.drawable.balloon_r_selector);
+				}
+			}
+			timeView.setText(message.getTime());
+			String tempStr = message.getContent();//消息具体内容
+			System.out.println("message="+message.toString());
+			//广播消息时出错，得判断是不是广播消息，广播消息
+			System.out.println("hhh="+message.getChatMode());
+			int chatMode=2;
+			String str=tempStr;
+			if(tempStr.substring(0, 1).equals("0")||tempStr.substring(0, 1).equals("1")){
+				chatMode = Integer.parseInt(tempStr.substring(0, 1));
+				str = tempStr.substring(1);
+				System.out.println("str="+str);
+				System.out.println("chatMode="+chatMode);
+			}
+			if((chatMode==0) || (chatMode==2)){
+				contentView.setVisibility(View.VISIBLE);
+				conImageView.setVisibility(View.GONE);
+				String zhengze = "f0[0-9]{2}|f10[0-7]";	
+				//正则表达式，用来判断消息内是否有表情
+				try {
+					SpannableString spannableString = ExpressionUtil.getExpressionString(context, str, zhengze);
+					contentView.setText(spannableString);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+			}else if(chatMode==1){
+				contentView.setVisibility(View.GONE);
+				conImageView.setVisibility(View.VISIBLE);
+				byte[] d=null;
+	    		if (str!=null) {  
+		    	   str = str.toUpperCase();  
+		    	    int length = str.length() / 2;  
+		    	    char[] hexChars = str.toCharArray();  
+		    	    d = new byte[length];  
+		    	    for(int i = 0; i < length; i++){  
+		    	        int pos = i * 2;  
+		    	        d[i] = (byte) ((byte) "0123456789ABCDEF".indexOf(hexChars[pos]) << 4 | (byte) "0123456789ABCDEF".indexOf(hexChars[pos + 1]));  
+		    	    } 
+	    		}
+				//将比特流转化为图片
+				//final Bitmap bitmap=null;
+				 if(d.length!=0) {
+					 final Bitmap bitmap = BitmapFactory.decodeByteArray(d, 0, d.length);  
+					 conImageView.setImageBitmap(bitmap);
+						conImageView.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								Intent i = new Intent();
+								i.setClass(ChatActivity.this, PictureActivity.class);
+								i.putExtra("pic",bitmap);
+								startActivity(i);
+							}
+						});
+				 }
+			}
+			return view1;
+		}
+
+	}
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_left:
+			this.finish();
+			break;
+		case R.id.bt_right:
+			Intent i = new Intent();
+			i.putExtra("his_info", name);
+			i.setClass(ChatActivity.this, FriendsInfoActivity.class);
+			startActivity(i);
+			break;
+		case R.id.chat_bq:
+			createExpressionDialog();
+			break;
+		case R.id.chat_add:
+			createMoreDialog();
+			break;
+		case R.id.chat_send:
+			System.out.println("type="+input_type);
+			String message = chatInputView.getText().toString();
+			//判断方式
+			//默认为0---显示“语音”
+			//语音点击为1---显示“键盘”
+			//有文字输入为2---显示“发送”
+			if(input_type == 0){//原本显示“语音”，点击一下为“键盘”
+				input_type = 1;
+				chatSendView.setText("键盘");
+				chatInputView.setVisibility(View.GONE);
+				speakView.setVisibility(View.VISIBLE);
+				speakView.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						Toast.makeText(ChatActivity.this, "按键时间太短", Toast.LENGTH_SHORT).show();
+					}
+				});
+				speakView.setOnLongClickListener(new OnLongClickListener() {
+					@Override
+					public boolean onLongClick(View arg0) {
+						Toast.makeText(ChatActivity.this, "长时间按住", Toast.LENGTH_SHORT).show();
+						return false;
+					}
+				});
+			}else if(input_type == 1){
+				input_type = 0;
+				chatInputView.setVisibility(View.VISIBLE);
+				speakView.setVisibility(View.GONE);
+				chatSendView.setText("语音");
+			}else{
+				sendMessage("0"+message,0);
+				chatInputView.setText("");
+			}
+			break;
+		default:
+			break;
+		}
+		
+	}
+	 private static final File PHOTO_DIR = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera");//拍摄照片存储的文件夹路劲   
+	 private File capturefile;//拍摄的照片文件  
+
+	private void createMoreDialog() {
+		builder = new Dialog(ChatActivity.this);
+		GridView gridView = getMoreGridView();
+		builder.setContentView(gridView);
+		builder.show();	
+		gridView.setOnItemClickListener(new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view,
+				int position, long id) {
+			switch(position){
+			case 0:
+				//跳转到图片选择界面
+				 Intent intentFromGallery = new Intent();
+                 intentFromGallery.setType("image/*"); // 设置文件类型
+                 intentFromGallery.setAction(Intent.ACTION_GET_CONTENT);
+                 startActivityForResult(intentFromGallery,IMAGE_REQUEST_CODE);
+                 builder.dismiss();
+				break;
+			case 1:
+				Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);  
+                startActivityForResult(intent, 1);  
+				builder.dismiss();
+				break;
+			case 2:
+				//视频通话模块
+				Intent i = new Intent();
+				i.setClass(ChatActivity.this, VedioChatActivity.class);
+				Bundle bd = new Bundle();
+				bd.putParcelable("friends", friends);
+				i.putExtra("bd", bd);
+				startActivity(i);
+				builder.dismiss();
+				break;
+			case 3:
+				//语音通话
+				Intent i1 = new Intent();
+				i1.setClass(ChatActivity.this, VoiceChatActivity.class);
+				Bundle bd1 = new Bundle();
+				bd1.putParcelable("friends", friends);
+				i1.putExtra("bd", bd1);
+				startActivity(i1);
+				builder.dismiss();
+				break;
+			case 4:
+				//文件传输
+				Intent i4 = new Intent();
+				i4.setClass(ChatActivity.this, MyFileManager.class);
+				startActivityForResult(i4,FILE_RESULT_CODE);
+				builder.dismiss();
+				break;
+				default:break;
+			}
+		}
+	});
+}
+	/*
+ * 发送文件
+ * */
+	private void sendFile(String name, File file,
+			XMPPConnection connection) {
+		FileTransferManager manager = new FileTransferManager(connection);
+		OutgoingFileTransfer transfer = manager.createOutgoingFileTransfer(name);
+		long timeOut = 1000000;
+		long sleepMin = 3000;
+		long spTime = 0;
+		int rs=0;
+		try {
+			transfer.sendFile(file, "pls re file!");
+			rs = transfer.getStatus().compareTo(FileTransfer.Status.complete);
+			spTime = spTime + sleepMin;
+			if(spTime>timeOut){
+				return;
+			}
+			try {
+				Thread.sleep(sleepMin);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
+	}
+	/*  
+     * 通过相机回传图片的文件名  
+     */  
+    private String getPhotoFileName() {   
+        Date date = new Date(System.currentTimeMillis());   
+        SimpleDateFormat dateFormat = new SimpleDateFormat("'IMG'_yyyyMMdd_HHmmss");   
+        return dateFormat.format(date) + ".jpg";   
+    }  
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		String picPath=null;
+		File file = null;   
+        Bitmap pic = null;
+		if (resultCode != RESULT_CANCELED){
+			switch (requestCode) {
+            case IMAGE_REQUEST_CODE:
+            	Uri uri = data.getData();   
+                String scheme = uri.getScheme();   
+                if(scheme.equalsIgnoreCase("file")) {   
+                    picPath = uri.getPath();   
+                    System.out.println("picPath="+picPath);   
+                    file = new File(picPath);   
+                    pic = decodeFile(file); 
+                    String messageStr = getBitToStr(pic);
+                    sendMessage("1"+messageStr, 1);
+                } else if (scheme.equalsIgnoreCase("content")) {   
+                    Cursor cursor = getContentResolver().query(uri, null, null,null, null);   
+                    cursor.moveToFirst();   
+                    picPath = cursor.getString(1);   
+                    file = new File(picPath);   
+                    pic = decodeFile(file);   
+                    String messageStr = getBitToStr(pic);
+                    sendMessage("1"+messageStr, 1);
+                }   
+               break;
+            case CAMERA_REQUEST_CODE:
+            	Bundle bundle = data.getExtras();  
+                Bitmap bitmap = (Bitmap) bundle.get("data");
+                FileOutputStream b = null; 
+                
+            	/*Uri uri1 = null;
+				if (data != null) {
+					System.out.println("555");
+					uri1 = data.getData();
+					//System.out.println("Data");
+					picPath = capturefile.getAbsolutePath();   
+	                System.out.println(picPath);   
+	                file = new File(picPath);   
+	                b = new FileOutputStream(fileName);  
+	                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, b);// 把数据写入文件   
+	                System.out.println("file_exist="+file.exists());
+	                pic = decodeFile(file);   
+	                if(pic!=null){
+	                	String messageStr = getBitToStr(pic);
+	                	sendMessage("1"+messageStr, 1);
+	                }else{
+	                	Toast.makeText(ChatActivity.this, "pic为空", Toast.LENGTH_SHORT).show();
+	                }
+				}else {
+					return;
+					//System.out.println("File");
+					//String fileName = getSharedPreferences("temp",Context.MODE_WORLD_WRITEABLE).getString("tempName", "");
+					//uri1 = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),fileName));
+				}*/
+                String sdStatus = Environment.getExternalStorageState();  
+                if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) { // 检测sd是否可用   
+                    return;  
+                }  
+                String name = new DateFormat().format("yyyyMMdd_hhmmss",Calendar.getInstance(Locale.CHINA)) + ".jpg";     
+                Toast.makeText(this, name, Toast.LENGTH_LONG).show();  
+                Bundle bundle1 = data.getExtras();  
+                Bitmap bitmap2 = (Bitmap) bundle1.get("data");// 获取相机返回的数据，并转换为Bitmap图片格式   
+                FileOutputStream b1 = null;  
+                File file1 = new File("/sdcard/myImage/");  
+                file1.mkdirs();// 创建文件夹   
+                String fileName = "/sdcard/myImage/"+name;  
+                try {  
+                    b1 = new FileOutputStream(fileName);  
+                    bitmap2.compress(Bitmap.CompressFormat.JPEG, 100, b1);// 把数据写入文件   
+                    File files = new File(fileName);
+                    pic = decodeFile(files);   
+	                if(pic!=null){
+	                	String messageStr = getBitToStr(pic);
+	                	sendMessage("1"+messageStr, 1);
+	                	System.out.println("haha");
+	                }else{
+	                	Toast.makeText(ChatActivity.this, "pic为空", Toast.LENGTH_SHORT).show();
+	                }
+                } catch (FileNotFoundException e) {  
+                    e.printStackTrace();  
+                } finally {  
+                    try {  
+                        b1.flush();  
+                        b1.close();  
+                    } catch (IOException e) {  
+                        e.printStackTrace();  
+                    }  
+                }  
+
+                break;
+            case FILE_RESULT_CODE:
+            	 Bundle bd = null;  
+                 if(data!=null&&(bd=data.getExtras())!=null){  
+                     filename = bd.getString("file")+bd.getString("fileName").toString();
+                     File file2 = new File(filename);
+                     sendFile(friends.getJID(),file2,ConnectionUtils.getConnection(ChatActivity.this));
+                 }  
+            	break;
+                default:break;
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	private String getBitToStr(Bitmap pic) {
+		stream = new ByteArrayOutputStream();  
+		pic.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+		//将图片转为比特流
+		byte[] bytes = stream.toByteArray(); 
+    	//将字符串编码成16进制数字,适用于所有字符（包括中文）
+    	StringBuilder stringBuilder = new StringBuilder("");  
+    	if (bytes!=null){
+        	for (int i = 0; i < bytes.length; i++) {  
+        	     int v = bytes[i] & 0xFF;  
+        	     String hv = Integer.toHexString(v);  
+        	     if (hv.length() < 2) {  
+        	            stringBuilder.append(0);  
+        	       }  
+        	        stringBuilder.append(hv);  
+        	    }  
+    	    }
+    	String result = stringBuilder.toString();
+		return result;
+	}
+	/*  
+     * 压缩图片，避免内存不足报错  
+     */  
+    private Bitmap decodeFile(File f) {   
+        Bitmap b = null;   
+        try {   
+            // Decode image size   
+            BitmapFactory.Options o = new BitmapFactory.Options();   
+            o.inJustDecodeBounds = true;   
+            FileInputStream fis = new FileInputStream(f);   
+            BitmapFactory.decodeStream(fis, null, o);   
+            fis.close();   
+            int scale = 1;   
+            if (o.outHeight > 100 || o.outWidth > 100) {   
+                scale = (int) Math.pow(   
+                        2,   
+                        (int) Math.round(Math.log(100 / (double) Math.max(   
+                                o.outHeight, o.outWidth)) / Math.log(0.5)));   
+            }   
+            // Decode with inSampleSize   
+            BitmapFactory.Options o2 = new BitmapFactory.Options();   
+            o2.inSampleSize = scale;   
+            fis = new FileInputStream(f);   
+            b = BitmapFactory.decodeStream(fis, null, o2);   
+            fis.close();   
+        } catch (IOException e) {   
+            e.printStackTrace();   
+        }   
+        return b;   
+    }  
+
+	private GridView getMoreGridView() {
+		final GridView view = new GridView(this);
+		ArrayList<HashMap<String, Object>> items = new ArrayList<HashMap<String,Object>>();
+		HashMap<String, Object> map = null;
+		map=new HashMap<String, Object>();
+		map.put("img", R.drawable.ic_launcher);
+		map.put("str", "图片");
+		items.add(map);
+		map=new HashMap<String, Object>();
+		map.put("img", R.drawable.ic_launcher);
+		map.put("str", "拍照");
+		items.add(map);
+		map=new HashMap<String, Object>();
+		map.put("img", R.drawable.ic_launcher);
+		map.put("str", "视频通话");
+		items.add(map);
+		map=new HashMap<String, Object>();
+		map.put("img", R.drawable.ic_launcher);
+		map.put("str", "语音通话");
+		items.add(map);
+		map=new HashMap<String, Object>();
+		map.put("img", R.drawable.ic_launcher);
+		map.put("str", "文件");
+		items.add(map);
+		SimpleAdapter adapter = new SimpleAdapter(this, items, R.layout.simple_grid_item, new String[]{"img","str"}, new int[]{R.id.item,R.id.text});
+		view.setAdapter(adapter);
+		view.setNumColumns(4);
+		view.setBackgroundColor(Color.rgb(214, 211, 214));
+		view.setHorizontalSpacing(2);
+		view.setVerticalSpacing(2);
+		view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
+		view.setGravity(Gravity.CENTER);
+		return view;
+	}
+	
+	private void createExpressionDialog() {
+		builder = new Dialog(ChatActivity.this);
+		GridView gridView = createGridView();
+		builder.setContentView(gridView);
+		builder.setTitle("默认表情");
+		builder.show();
+		gridView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				Bitmap bitmap = null;
+				bitmap = BitmapFactory.decodeResource(getResources(), imageIds[arg2 % imageIds.length]);
+				ImageSpan imageSpan = new ImageSpan(ChatActivity.this, bitmap);
+				String str = null;
+				if(arg2<10){
+					str = "f00"+arg2;
+				}else if(arg2<100){
+					str = "f0"+arg2;
+				}else{
+					str = "f"+arg2;
+				}
+				SpannableString spannableString = new SpannableString(str);
+				spannableString.setSpan(imageSpan, 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				chatInputView.append(spannableString);
+				builder.dismiss();
+			}
+		});
+		
+	}
+	private GridView createGridView() {
+		final GridView view = new GridView(this);
+		List<Map<String,Object>> listItems = new ArrayList<Map<String,Object>>();
+		//生成107个表情的id，封装
+		for(int i = 0; i < 107; i++){
+			try {
+				if(i<10){
+					Field field = R.drawable.class.getDeclaredField("f00" + i);
+					int resourceId = Integer.parseInt(field.get(null).toString());
+					imageIds[i] = resourceId;
+				}else if(i<100){
+					Field field = R.drawable.class.getDeclaredField("f0" + i);
+					int resourceId = Integer.parseInt(field.get(null).toString());
+					imageIds[i] = resourceId;
+				}else{
+					Field field = R.drawable.class.getDeclaredField("f" + i);
+					int resourceId = Integer.parseInt(field.get(null).toString());
+					imageIds[i] = resourceId;
+				}
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+	        Map<String,Object> listItem = new HashMap<String,Object>();
+			listItem.put("image", imageIds[i]);
+			listItems.add(listItem);
+		}
+		
+		SimpleAdapter simpleAdapter = new SimpleAdapter(this, listItems, R.layout.team_layout_single_expression_cell, new String[]{"image"}, new int[]{R.id.image});
+		view.setAdapter(simpleAdapter);
+		view.setNumColumns(6);
+		view.setBackgroundColor(Color.rgb(214, 211, 214));
+		view.setHorizontalSpacing(1);
+		view.setVerticalSpacing(1);
+		view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
+		view.setGravity(Gravity.CENTER);
+		return view;
+	}
+}

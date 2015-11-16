@@ -1,0 +1,428 @@
+package com.example.ehs.xmpphelper;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.jivesoftware.smack.Connection;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.ReportedData;
+import org.jivesoftware.smackx.ReportedData.Row;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.muc.HostedRoom;
+import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.packet.DiscoverItems;
+import org.jivesoftware.smackx.packet.DiscoverItems.Item;
+import org.jivesoftware.smackx.packet.VCard;
+import org.jivesoftware.smackx.search.UserSearchManager;
+
+import com.example.ehs.R;
+import com.example.ehs.model.Friends;
+import com.example.ehs.utils.ConnectionUtils;
+
+import android.content.Context;
+import android.widget.Toast;
+
+public class ContacterManager {
+	/**
+	 * 保存着所有的联系人信息
+	 */
+	public static Map<String, Friends> contacters = null;
+
+	public static void init(Connection connection) {
+		contacters = new HashMap<String, Friends>();
+		for (RosterEntry entry : connection.getRoster().getEntries()) {
+			contacters.put(entry.getUser(),
+					transEntryToUser(entry, connection.getRoster()));
+		}
+	}
+
+	public static void destroy() {
+		contacters = null;
+	}
+
+	/**
+	 * 获得所有的联系人列表
+	 * 
+	 * @return
+	 */
+	public static List<Friends> getContacterList(Connection connection) {
+		init(connection);
+		if (contacters == null){
+			System.out.println("所有联系人列表为空！");
+			throw new RuntimeException("contacters is null");
+		}
+
+		List<Friends> friendsList = new ArrayList<Friends>();
+
+		for (String key : contacters.keySet())
+			friendsList.add(contacters.get(key));
+
+		return friendsList;
+	}
+
+	/**
+	 * 获得所有未分组的联系人列表
+	 * 
+	 * @return
+	 */
+	public static List<Friends> getNoGroupUserList(Roster roster) {
+		List<Friends> friendsList = new ArrayList<Friends>();
+
+		// 服务器的用户信息改变后，不会通知到unfiledEntries
+		for (RosterEntry entry : roster.getUnfiledEntries()) {
+			friendsList.add(contacters.get(entry.getUser()).clone());
+		}
+
+		return friendsList;
+	}
+
+	/**
+	 * 获得所有分组联系人
+	 * 
+	 * @return
+	 */
+	public static List<MRosterGroup> getGroups(Roster roster,Connection connection) {
+		init(connection);
+		if (contacters == null){
+			System.out.println("所有分组联系人为空");
+			throw new RuntimeException("contacters is null");
+		}
+		List<MRosterGroup> groups = new ArrayList<ContacterManager.MRosterGroup>();
+
+		groups.add(new MRosterGroup("      "+"所有好友", getContacterList(connection)));
+		groups.add(new MRosterGroup("      "+"未分组好友", getNoGroupUserList(roster)));
+
+		for (RosterGroup group : roster.getGroups()) {
+			List<Friends> groupUsers = new ArrayList<Friends>();
+			for (RosterEntry entry : group.getEntries()) {
+				groupUsers.add(contacters.get(entry.getUser()));
+			}
+			groups.add(new MRosterGroup(group.getName(), groupUsers));
+		}
+
+		return groups;
+	}
+
+	/**
+	 * 根据RosterEntry创建一个User
+	 * 
+	 * @param entry
+	 * @return
+	 */
+	public static Friends transEntryToUser(RosterEntry entry, Roster roster) {
+		Friends friends = new Friends();
+		if (entry.getName() == null) {
+			friends.setName(entry.getUser());
+		} else {
+			friends.setName(entry.getName());
+		}
+		friends.setJID(entry.getUser());
+		Presence presence = roster.getPresence(entry.getUser());
+		friends.setFrom(presence.getFrom());
+		friends.setStatus(presence.getStatus());
+		friends.setSize(entry.getGroups().size());
+		friends.setAvailable(presence.isAvailable());
+		friends.setType(entry.getType());
+		return friends;
+	}
+
+	/**
+	 * 修改这个好友的昵称
+	 * 
+	 * @param user
+	 * @param nickname
+	 */
+	public static void setNickname(Friends friends, String nickname,
+			XMPPConnection connection) {
+		RosterEntry entry = connection.getRoster().getEntry(friends.getJID());
+		entry.setName(nickname);
+	}
+/*
+ * 新建组
+ * */	
+public static void addGroup(final Context context,final String groupName,final XMPPConnection connection){
+	if(groupName == null)
+		return ;
+	new Thread(){
+		public void run(){
+			RosterGroup group = connection.getRoster().getGroup(groupName);
+			if(group!=null){
+				Toast.makeText(context, "该组已经存在！", Toast.LENGTH_SHORT).show();
+			}else{
+				RosterGroup newGroup = connection.getRoster()
+						.createGroup(groupName);
+				if(newGroup!=null){
+					Toast.makeText(context, "创建组成功！", Toast.LENGTH_SHORT).show();
+				}else{
+					Toast.makeText(context, "创建组失败！", Toast.LENGTH_SHORT).show();
+				}
+			}
+		}
+	}.start();
+}
+	/**
+	 * 把一个好友添加到一个组中
+	 * 
+	 * @param user
+	 * @param groupName
+	 */
+	public static void addUserToGroup(final Friends friends, final String groupName,
+			final XMPPConnection connection) {
+		if (groupName == null || friends == null)
+			return;
+		// 将一个rosterEntry添加到group中是PacketCollector，会阻塞线程
+		new Thread() {
+			public void run() {
+				RosterGroup group = connection.getRoster().getGroup(groupName);
+				// 这个组已经存在就添加到这个组，不存在创建一个组
+				RosterEntry entry = connection.getRoster().getEntry(
+						friends.getJID());
+				try {
+					if (group != null) {
+						if (entry != null)
+							group.addEntry(entry);
+					} else {
+						RosterGroup newGroup = connection.getRoster()
+								.createGroup(groupName);
+						if (entry != null)
+							newGroup.addEntry(entry);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+	}
+
+	/**
+	 * 把一个好友从组中删除
+	 * 
+	 * @param user
+	 * @param groupName
+	 */
+	public static void removeUserFromGroup(final Friends friends,
+			final String groupName, final XMPPConnection connection) {
+		if (groupName == null || friends == null)
+			return;
+		new Thread() {
+			public void run() {
+				RosterGroup group = connection.getRoster().getGroup(groupName);
+				if (group != null) {
+					try {
+						RosterEntry entry = connection.getRoster().getEntry(
+								friends.getJID());
+						if (entry != null)
+							group.removeEntry(entry);
+					} catch (XMPPException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}.start();
+	}
+/*
+ * 查找好友
+ * 
+ * */
+	public static Friends searchSB(Context context,String jid,String jidName){
+		Friends friends = new Friends();
+		UserSearchManager search = new UserSearchManager(ConnectionUtils.getConnection(context)); 
+		Form searchForm;
+		try {
+			searchForm = search.getSearchForm("search."+ConnectionUtils.host);
+	        Form answerForm = searchForm.createAnswerForm();  
+	        answerForm.setAnswer("Username", true);  
+	        answerForm.setAnswer("search", jidName);  
+	        ReportedData data = search.getSearchResults(answerForm,"search."+ConnectionUtils.host); 
+	        Iterator<Row> it = data.getRows();  
+            Row row=null;  
+            String ansS="";  
+            while(it.hasNext()){  
+                row=it.next();  
+                ansS+=row.getValues("Username").next().toString()+"\n";  
+                //Log.i("Username",row.getValues("Username").next().toString());   
+            }  
+            System.out.println("ansS="+ansS);
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}   
+
+        
+		return friends;
+	}
+	
+/*
+ * 查找所有的群
+ * */
+//初始化会议服务
+	public static List<HashMap<String, Object>> getCrowds(
+			XMPPConnection connection) {
+		List<HashMap<String, Object>> list = new ArrayList<HashMap<String,Object>>();
+		HashMap<String, Object> map = null;
+		String jid = null;
+		try {
+			//获得服务数量
+			Collection<HostedRoom> chatRooms = MultiUserChat.getHostedRooms(connection, connection.getServiceName());
+			Object[] object = chatRooms.toArray();
+			for(int i=0; i<object.length;i++){
+				System.out.println("rooms:");
+				System.out.println("name="+((HostedRoom)object[i]).getName());
+				System.out.println("jid="+((HostedRoom)object[i]).getJid());
+				//获得会议jid，才能获得会议中的聊天室（相当于群）
+				if(((HostedRoom)object[i]).getJid().startsWith("conference")){
+					jid = ((HostedRoom)object[i]).getJid();
+					break;
+					}
+			}
+			if(!jid.equals(null)){
+				List<Item>	items = init(connection,jid);
+				for(int j=0;j<items.size();j++){
+					map = new HashMap<String, Object>();
+					map.put("avater", R.drawable.default_avatar);
+					map.put("name", (items.get(j).getName()));
+					//将jid传回去，这样点击某一个列表的时候可以获得该列表对应会议的信息（即群信息）
+					map.put("jid",(items.get(j).getEntityID()));
+					list.add(map);
+				}
+			}
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+//初始化房间列表
+	public static List<Item> init(XMPPConnection connection,String jid) {  
+      List<Item>  listDiscoverItems = new ArrayList<DiscoverItems.Item>();  
+        // 获得与XMPPConnection相关的ServiceDiscoveryManager  
+        ServiceDiscoveryManager discoManager = ServiceDiscoveryManager  
+                .getInstanceFor(connection);  
+  
+        // 获得指定XMPP实体的项目  
+        // 这个例子获得与在线目录服务相关的项目  
+        DiscoverItems discoItems;  
+        try {  
+            discoItems = discoManager.discoverItems(jid);  
+            // 获得被查询的XMPP实体的要查看的项目  
+            Iterator it = discoItems.getItems();  
+            // 显示远端XMPP实体的项目  
+            while (it.hasNext()) {  
+                DiscoverItems.Item item = (DiscoverItems.Item) it.next();  
+                System.out.println("会议室id="+item.getEntityID());  
+                System.out.println("会议室名字="+item.getName());  
+                listDiscoverItems.add(item);  
+            }  
+        } catch (XMPPException e) {  
+            e.printStackTrace();  
+        }  
+        return listDiscoverItems;
+    }  
+//do test 
+	public static void doTest(XMPPConnection connection,String jid){
+		try {  
+			MultiUserChat muc = new MultiUserChat(connection, jid);  
+            // 创建聊天室,进入房间后的nickname(昵称)  
+            muc.join("痞子测试");  
+            System.out.println("加入成功！");
+            ContacterManager.getAllMember(muc);
+          //  muc.addMessageListener(chatListenener);
+        } catch (XMPPException e) {  
+            e.printStackTrace();  
+        } 
+	}
+	
+	/** 
+     * 获取聊天室的所有成员 
+     */  
+   public static List<HashMap<String, Object>> getAllMember(final MultiUserChat muc) {  
+	   final List<HashMap<String, Object>> list=new ArrayList<HashMap<String,Object>>();
+        System.out.println("获取聊天室的所有成员");  
+      //  affiliates.clear();  
+        new Thread(new Runnable() {  
+            @Override  
+            public void run() {  
+                try {  
+                    Iterator<String> it = muc.getOccupants(); 
+             	   HashMap<String, Object> map = null;
+                    while (it.hasNext()) {  
+                        String name = it.next();  
+                        name = name.substring(name.indexOf("/") + 1);  
+                      //  affiliates.add(name);  
+                       System.out.println("成员名字:" + name);  
+                       map = new HashMap<String, Object>();
+                       map.put("img", R.drawable.default_avatar);
+               		   map.put("name", name);
+               		   map.put("state", "管理员");
+               		   list.add(map);
+                    }  
+                } catch (Exception e) {  
+                    e.printStackTrace();  
+                }  
+  
+               // android.os.Message msg = new android.os.Message();  
+               // msg.what = MEMBER;  
+                //handler.sendMessage(msg);  
+            }  
+        }).start();
+		return list;  
+    }  
+	
+	public static class MRosterGroup {
+		private String name;
+		private List<Friends> friends;
+
+		public MRosterGroup(String name, List<Friends> friends) {
+			this.name = name;
+			this.friends = friends;
+		}
+
+		public int getCount() {
+			if (friends != null)
+				return friends.size();
+			return 0;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public List<Friends> getFriends() {
+			return friends;
+		}
+
+		public void setFriends(List<Friends> friends) {
+			this.friends = friends;
+		}
+
+	}
+/**
+     * 获取用户VCard信息
+     * 
+     * @param connection
+     * @param user
+     * @return
+     * @throws XMPPException
+     */ 
+    public static VCard getUserVCard(XMPPConnection connection, String user) 
+            throws XMPPException { 
+        VCard vcard = new VCard(); 
+       // vcard.load(connection, user); 
+        vcard.load(connection); 
+        return vcard; 
+    } 
+
+}

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="@drawable/bg_login_activity">
+    <include 
+         android:id="@+id/search_pswd_title"
+        layout="@layout/title_activity"
+        />
+     <EditText 
+	    android:id="@+id/input_student_id"
+	    android:layout_below="@id/search_pswd_title"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:hint="@string/account"
+	    android:inputType="text"
+	    android:layout_marginTop="20dip"
+	    android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    android:background="@drawable/bg_input_top"
+        android:padding="8dip"
+	    />
+    <View 
+	    android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:background="@drawable/divider_input"
+        android:id="@+id/divider_input1"
+        android:layout_below="@id/input_student_id"
+        android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    />
+    
+    <EditText 
+	    android:id="@+id/input_phone_num"
+	    android:layout_below="@id/divider_input1"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:hint="@string/phone_number"
+	    android:inputType="phone"
+	    android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    android:background="@drawable/bg_input_center"
+        android:padding="8dip"
+	    />
+    <View 
+	    android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:background="@drawable/divider_input"
+        android:id="@+id/divider_input2"
+        android:layout_below="@id/input_phone_num"
+        android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    />
+    
+ <!--  <EditText 
+        android:id="@+id/input_verification_num"
+	    android:layout_below="@id/divider_input2"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:hint="@string/input_verification_code"
+	    android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    android:background="@drawable/bg_input_center"
+        android:padding="8dip"
+	    />
+    <View 
+	    android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:background="@drawable/divider_input"
+        android:id="@+id/divider_input3"
+        android:layout_below="@id/input_verification_num"
+        android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    />-->   
+    
+    <EditText 
+	    android:id="@+id/input_new_pswd"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@id/divider_input2"
+	    android:hint="@string/input_new_pswd"
+	    android:layout_marginLeft="8dp"
+	    android:layout_marginRight="8dp"
+	    android:background="@drawable/bg_input_bottom"
+	    android:padding="8dip"
+	    android:password="true"
+	    />
+    
+    <LinearLayout 
+        android:id="@+id/layout_verify"
+        android:layout_below="@id/input_new_pswd"
+  	    android:paddingLeft="8dp"
+	    android:paddingRight="8dp"
+	   	android:layout_marginTop="10dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="60dp"
+	    android:orientation="horizontal">
+	 <!--    <Button 
+		    android:id="@+id/get_verification_num"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/get_verification_code"
+		    android:background="@drawable/bg_verfiy_btn"
+		    android:textSize="@dimen/medium_text"
+		    android:textColor="@color/white"
+		    android:layout_weight="1"
+		    android:layout_marginRight="16dip"
+		    />--> 
+	    
+	    <Button 
+		    android:id="@+id/submit"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/submit"
+		    android:textSize="@dimen/medium_text"
+		    android:textColor="@color/white"
+		    android:layout_weight="1"
+		    android:background="@drawable/bg_submit_btn"
+	    />
+	    
+   </LinearLayout>
+	 
+
+</RelativeLayout>
+

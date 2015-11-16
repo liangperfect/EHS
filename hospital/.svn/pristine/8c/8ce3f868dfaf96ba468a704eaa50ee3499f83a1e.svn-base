@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.ehs"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="17" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- 音频刻录权限 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/app_2"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <!-- 欢迎界面 -->
+        <activity
+            android:name="com.example.ehs.WelcomActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- 登陆界面 -->
+        <activity android:name=".LoginActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 主功能界面 -->
+        <activity android:name=".MainActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 注册界面 -->
+        <activity android:name=".RegisterActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 找回密码界面 -->
+        <activity android:name=".SearchPswdActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        
+        
+        <!-- IM界面 -->
+        <activity android:name=".im.IMActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 消息界面 -->
+        <activity android:name=".im.MessageActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 好友界面 -->
+        <activity android:name=".im.GroupActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 聊天界面 -->
+        <activity android:name=".im.ChatActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 添加好友界面 -->
+        <activity android:name=".im.AddFriendActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 添加好友下一步界面 -->
+        <activity android:name=".im.AddNextActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 好友信息界面 -->
+        <activity android:name=".im.FriendsInfoActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 图片保存界面 -->
+        <activity android:name=".im.PictureActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 视频请求与应答界面 -->
+        <activity android:name=".im.VedioChatActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 语音请求与应答界面 -->
+        <activity android:name=".im.VoiceChatActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 视频语音聊天界面 -->
+        <activity android:name=".im.VedioVoiceChatActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 获取文件界面 -->
+        <activity android:name=".im.MyFileManager"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 群界面 -->
+        <activity android:name=".im.CrowdActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 群聊界面 -->
+        <activity android:name=".im.CrowdChatActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 群聊信息-->
+        <activity android:name=".im.CrowdInfoActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        <!-- 群聊成员信息-->
+        <activity android:name=".im.CrowdMemberActivity"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+        
+        <!-- 通知界面 -->
+        <activity android:name=".notice.NoticeActivity"/>
+        <!-- 医院通知界面 -->
+        <activity android:name=".notice.HospitalNoticeActivity"/>
+        <!-- 护士站通知界面 -->
+        <activity android:name=".notice.NurseNoticeActivity"/>
+        
+        <!--查询界面  -->
+        <activity android:name=".query.QueryActivity"/>
+        <!--医嘱查询界面  -->
+        <activity android:name=".query.DoctorWordsActivity"/>
+        <!--医嘱查询详细信息界面  -->
+        <activity android:name=".query.DoctorWordsDetailActivity"/>
+        <!-- 费用查询界面 -->
+        <activity android:name=".query.FeeActivity"/>
+        <!-- 检查结果查询界面 -->
+        <activity android:name=".query.CheckResultsActivity"/>
+        
+        <!-- 医院介绍界面 -->
+        <activity android:name=".hospital.HospitalActivity"/>
+        <!-- 医院简介界面 -->
+        <activity android:name=".hospital.AboutHospitalActivity"/>
+        <!-- 科室介绍界面 -->
+        <activity android:name=".hospital.AboutSubjectActivity"/>
+        <!-- 医生介绍界面 -->
+        <activity android:name=".hospital.AboutDoctorActivity"/>
+        <!-- 某个医生介绍界面 -->
+        <activity android:name=".hospital.OneDoctor"/>
+        <!-- 儿科界面 -->
+        <activity android:name=".hospital.PaediatricsActivity"/>
+        
+        
+        <!-- 视频会诊界面 -->
+        <activity android:name=".vedio.VedioMeetActivity"/>
+        
+        <!-- 点餐界面 -->
+        <activity android:name=".order.OrderMealActivity"/>
+        <!--菜单界面  -->
+        <activity android:name=".order.MealMenuActivity"/>
+        <!-- 我的订单界面 -->
+        <activity android:name=".order.MyMealOrderActivity"/>
+        <!-- 菜品详细信息 -->
+        <activity android:name=".order.AMealInfoActivity"/>
+         <!-- 将某一菜品加入购物车 -->
+        <activity android:name=".order.PurseMealActivity"/>
+        <!-- 我的收货地址 -->
+        <activity android:name=".order.ReceiveAddressActivity"/>
+        <!-- 我的历史订单-->
+        <activity android:name=".order.HistoryOrderActivity"/>
+        <!-- 详细订单信息-->
+        <activity android:name=".order.AOrderDetailsActivity"/>
+         <!-- 我的未提交订单 -->
+        <activity android:name=".order.UnSubmitActivity"/>
+        
+        
+        
+        <!-- 娱乐界面 -->
+        <activity android:name=".entertainments.EntertainMentActivity"/>
+        <!-- 电影界面 -->
+        <activity android:name=".entertainments.MovieActivity"/>
+        <!-- 本地视频界面 -->
+        <activity android:name=".entertainments.LocalMoviesActivity"/>
+        <!-- 远程视频界面 -->
+        <activity android:name=".entertainments.RemoteMoviesActivity"/>
+        <!-- 游戏界面 -->
+        <activity android:name=".entertainments.GamesActivity"/>
+        <!-- 音乐界面 -->
+        <activity android:name=".entertainments.MusicActivity"/>
+        <!-- 本地音乐界面 -->
+        <activity android:name=".entertainments.LocalMusicActivity"/>
+        <!-- 远程音乐界面 -->
+        <activity android:name=".entertainments.RemoteMusicActivity"/>
+        
+        <!-- 购物界面 -->
+        <activity android:name=".shopping.ShoppingActivity"/>
+        <!-- 物品浏览界面 -->
+        <activity android:name=".shopping.GoodsBrowActivity"/>
+        <!-- 我的订单界面 -->
+        <activity android:name=".shopping.ShopOrderActivity"/>
+        
+        <!-- 设置界面 -->
+        <activity android:name=".setting.SettingActivity"/>
+        <!-- 应用简介界面-->
+        <activity android:name=".setting.AboutAppActivity"/>
+        <!-- 修改密码界面 -->
+        <activity android:name=".setting.ResetPswdActivity"/>
+        
+        <!-- 获取联系人的service -->
+        <service android:name=".xmpphelper.IMContactService"/>
+        <!-- 获取聊天的service -->
+		<service android:name=".xmpphelper.IMChatService"/>
+		<!-- 文件传输的service -->
+		<service android:name=".xmpphelper.fileListenerService"/>
+    </application>
+
+</manifest>

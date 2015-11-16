@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+    <ImageView 
+        android:id="@+id/send_file_pic"
+        android:layout_width="@dimen/small_avatar_width"
+        android:layout_height="@dimen/small_avatar_height"
+        android:src="@drawable/doc"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_gravity="center_vertical"/>
+    <LinearLayout 
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:layout_marginLeft="5dp"
+        >
+        <TextView 
+            android:text="文件名"
+            android:textSize="@dimen/big_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/file_name"
+            android:layout_weight="1"/>
+        <TextView 
+            android:text="文件大小"
+            android:textSize="@dimen/big_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/file_size"
+            android:layout_weight="1"/>
+    </LinearLayout>
+	<TextView 
+	    android:id="@+id/send_file_ok"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="bottom"
+	    android:text="发送中"
+	    android:layout_marginRight="8dp"
+	    android:layout_marginBottom="4dp"
+	    android:textSize="@dimen/big_text"/>
+</LinearLayout>

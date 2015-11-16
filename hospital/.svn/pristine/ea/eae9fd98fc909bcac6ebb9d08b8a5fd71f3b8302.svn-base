@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:id="@+id/ScrollView" 
+    android:layout_width="fill_parent"  
+    android:layout_height="wrap_content" 
+    android:scrollbars="vertical">  
+    <RelativeLayout android:id="@+id/LinearLayout"  
+        android:orientation="vertical" 
+        android:layout_width="fill_parent"  
+        android:layout_height="wrap_content">
+        
+        <ImageView
+            android:id="@+id/hospitalimage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/a" 
+            android:layout_marginTop="0dp"
+            />
+        
+      <TextView android:id="@+id/TestViewabouthospital" 
+            android:layout_width="fill_parent"  
+            android:layout_height="wrap_content" 
+            android:text="@string/hospitalinform" 
+            android:textSize="@dimen/middle_text"
+           	android:layout_below="@id/hospitalimage" 	
+            />
+
+      
+    </RelativeLayout>  
+</ScrollView>  

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+     <LinearLayout 
+        android:id="@+id/chat_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/bg_login_activity"/>
+    <!--     <SurfaceView 
+            android:id="@+id/chat_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />--> 
+    <RelativeLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        >
+        <TextView 
+        android:id="@+id/chat_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="时间"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"/>
+        <LinearLayout 
+            android:id="@+id/buttons"
+            android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"
+	        android:layout_marginBottom="0dp"
+	        android:orientation="horizontal"
+            >
+            <Button 
+                android:id="@+id/close_vedio"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="关闭视频"
+                android:background="@drawable/bg_submit_btn"/>
+	       <Button 
+	           android:id="@+id/chat_closed"
+	           android:layout_width="match_parent"
+	           android:layout_height="wrap_content"
+	           android:layout_weight="1"
+	           android:text="结束"
+	           android:background="@drawable/bg_submit_btn"/>
+	        <Button 
+                android:id="@+id/close_voice"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="关闭语音"
+                android:background="@drawable/bg_submit_btn"/>
+        </LinearLayout>
+          <ImageView 
+             android:id="@+id/chat_mine"
+             android:layout_height="80dp"
+             android:layout_width="80dp"
+             android:layout_alignParentRight="true"
+             android:layout_above="@id/buttons"
+             android:layout_marginRight="8dp"
+             android:layout_marginBottom="8dp"
+             android:src="@drawable/default_avatar"/>
+             <!-- <SurfaceView 
+                 android:id="@+id/chat_mine"
+                 android:layout_height="80dp"
+                 android:layout_width="80dp"
+                 android:layout_alignParentRight="true"
+                 android:layout_above="@id/buttons"
+                 android:layout_marginRight="8dp"
+                 android:layout_marginBottom="8dp"/>-->
+    </RelativeLayout>
+ 
+    
+
+</FrameLayout>

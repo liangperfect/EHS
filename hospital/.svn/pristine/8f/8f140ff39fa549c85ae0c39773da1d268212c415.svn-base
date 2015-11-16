@@ -1,0 +1,176 @@
+package com.example.ehs.hospital;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+
+import com.example.ehs.R;
+
+public class PaediatricsActivity extends Activity implements
+		Button.OnClickListener {
+	private TextView txt = null;
+	private Button btn = null;
+	private Gallery gallery;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_paediatrics);
+		txt = (TextView) findViewById(R.id.title);
+		txt.setText("儿童专科");
+		btn = (Button) findViewById(R.id.bt_left);
+		btn.setVisibility(View.VISIBLE);
+		btn.setOnClickListener(this);
+		// 画廊的初始化
+		gallery = (Gallery) findViewById(R.id.subjectGallery);
+		ArrayList<HashMap<String, Object>> items = new ArrayList<HashMap<String, Object>>();
+		HashMap<String, Object> map = null;
+
+		map = new HashMap<String, Object>();
+		map.put("img", R.drawable.aifushen);
+		map.put("str", "艾医生");
+		items.add(map);
+
+		map = new HashMap<String, Object>();
+		map.put("img", R.drawable.kobe);
+		map.put("str", "科医生");
+		items.add(map);
+
+		map = new HashMap<String, Object>();
+		map.put("img", R.drawable.weide);
+		map.put("str", "韦医生");
+		items.add(map);
+
+		map = new HashMap<String, Object>();
+		map.put("img", R.drawable.mac);
+		map.put("str", "麦医生");
+		items.add(map);
+
+		SimpleAdapter adapter = new SimpleAdapter(this, items,
+				R.layout.copy_of_simple_grid_item,
+				new String[] { "img", "str" }, new int[] { R.id.copyitem,
+						R.id.copytext });
+		gallery.setAdapter(adapter);
+		gallery.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				System.out.println(position);
+				switch (position) {
+				case 0:
+					// 第一个医生 艾弗森
+					Intent intent1 = new Intent();
+					intent1.putExtra("judgedoctor", 0);
+					intent1.setClass(PaediatricsActivity.this, OneDoctor.class);
+					PaediatricsActivity.this.startActivity(intent1);					
+					break;
+				case 1:
+					// 第二个医生 科比医生
+					Intent intent2 = new Intent();
+					intent2.putExtra("judgedoctor", 1);
+					intent2.setClass(PaediatricsActivity.this, OneDoctor.class);
+					PaediatricsActivity.this.startActivity(intent2);
+
+					break;
+				case 2:
+					// 第三个医生 韦德医生
+					Intent intent3 = new Intent();
+					intent3.putExtra("judgedoctor", 2);
+					intent3.setClass(PaediatricsActivity.this, OneDoctor.class);
+					PaediatricsActivity.this.startActivity(intent3);
+					break;
+				case 3:
+					Intent intent4 = new Intent();
+					intent4.putExtra("judgedoctor", 3);
+					intent4.setClass(PaediatricsActivity.this, OneDoctor.class);
+					PaediatricsActivity.this.startActivity(intent4);
+					break;
+				default:
+					break;
+				}
+			}
+		});
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.paediatrics, menu);
+		return true;
+	}
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		switch (v.getId()) {
+		case R.id.bt_left:
+			this.finish();
+			break;
+		default:
+			break;
+		}
+	}
+
+}
+//
+// class ImageAdapter extends BaseAdapter {
+// // 定义Context 即activity
+// private Context context;
+// // 定义整形数组 即图像资源
+// private Integer image[] = { R.drawable.a, R.drawable.b,
+// R.drawable.hospital, R.drawable.fuyou };
+//
+// public ImageAdapter(Context c) {
+//
+// context = c;
+// }
+//
+// @Override
+// // 返回后台一共有多少数据
+// public int getCount() {
+// // TODO Auto-generated method stub
+// // return image.length;
+// return Integer.MAX_VALUE;
+// }
+//
+// @Override
+// // 返回指定位置的数据对象
+// public Object getItem(int position) {
+// // TODO Auto-generated method stub
+// return position;
+// }
+//
+// @Override
+// // 返回指定位置对象的ID
+// public long getItemId(int position) {
+// // TODO Auto-generated method stub
+// return position;
+// }
+//
+// @SuppressWarnings("deprecation")
+// @Override
+// // 返回一个加载了数据的View，以便其他控件进行调用
+// public View getView(int position, View convertView, ViewGroup parent) {
+// // TODO Auto-generated method stub
+// ImageView imageview = new ImageView(context);
+// imageview.setImageResource(image[position % image.length]);
+// // imageview.setImageResource(image[position]);
+// imageview.setScaleType(ImageView.ScaleType.FIT_XY);
+// imageview.setLayoutParams(new Gallery.LayoutParams(200, 200));
+// imageview.setPadding(25, 0, 25, 0);
+// return imageview;
+// }
+// }

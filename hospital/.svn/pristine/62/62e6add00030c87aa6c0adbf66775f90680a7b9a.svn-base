@@ -1,0 +1,71 @@
+package com.example.ehs.query;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
+
+import com.example.ehs.R;
+import com.example.ehs.notice.HospitalNoticeActivity;
+/*
+ * 查询模块----医嘱显示模块（可参看AboutAppActivity模块）
+ * */
+public class DoctorWordsActivity extends Activity{
+	private ListView listview;
+	
+	private SimpleAdapter adapter=null;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.doctor_words_query);
+		init();
+	}
+	private void init() {
+		listview = (ListView)findViewById(R.id.notice_list);
+		adapter = new SimpleAdapter(DoctorWordsActivity.this, getList(), R.layout.notice_item, 
+				new String[]{"title","sb","time","content"}, 
+				new int[]{R.id.notice_title,R.id.notice_sb,R.id.notice_time,R.id.notice_content});
+		listview.setAdapter(adapter);
+		listview.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				Intent i = new Intent();
+				i.setClass(DoctorWordsActivity.this, DoctorWordsDetailActivity.class);
+				Bundle b = new Bundle();
+				b.putString("doctor","李医生");
+				b.putString("content", "按时吃药，不能碰凉水,按时吃药，不能碰凉水....");
+				i.putExtra("bd", b);
+				startActivity(i);
+			}
+		});
+	}
+
+	private List<HashMap<String, String>> getList() {
+		List<HashMap<String, String>> list=new ArrayList<HashMap<String,String>>();
+		HashMap<String, String> map=null;
+		map = new HashMap<String, String>();
+		map.put("title", "医嘱");
+		map.put("sb", "李医生");
+		map.put("time", "@ 2014/03/28 11:23:54");
+		map.put("content", "按时吃药，不能碰凉水....");
+		list.add(map);
+		map = new HashMap<String, String>();
+		map.put("title", "医嘱");
+		map.put("sb", "张医生");
+		map.put("time", "@ 2014/03/28 11:23:54");
+		map.put("content", "不要吃辛辣、冰凉的饮食....");
+		list.add(map);
+		return list;
+	}
+
+}

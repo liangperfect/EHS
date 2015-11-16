@@ -1,0 +1,70 @@
+package com.example.ehs.order;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import com.example.ehs.R;
+import com.example.ehs.db.IMMessageDb;
+import com.example.ehs.db.OrderDb;
+import com.example.ehs.model.IMMessage;
+
+import android.app.ListActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.SimpleAdapter;
+
+public class HistoryOrderActivity extends ListActivity implements OnClickListener{
+	private Button bt_update;
+	
+	OrderDb orderDb = null;
+	private List<HashMap<String, String>> list=null;
+	private HashMap<String,String> map = null;
+	
+	SimpleAdapter adapter = null;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.history_order);
+		
+		init();
+		upDateListView();
+	}
+	private void init() {
+		bt_update = (Button)findViewById(R.id.bt_update);
+		bt_update.setOnClickListener(this);
+		bt_update.setVisibility(View.GONE);
+	}
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_update:
+			upDateListView();
+			break;
+		default:
+			break;
+		}
+	}
+	private void upDateListView() {
+		list = new ArrayList<HashMap<String,String>>();
+		adapter = buildAdapter();
+		//获取列表信息
+	}
+	private SimpleAdapter buildAdapter() {
+		putValues("订单号","订单内容","订单内容","更多信息");
+		 adapter = new SimpleAdapter(HistoryOrderActivity.this, list, R.layout.history_order_item, new String[]{"order_id","order_content","order_time","order_more"}, new int[]{R.id.order_id,R.id.order_content,R.id.order_time,R.id.order_more});
+		 return adapter; 
+	}
+	//列表放值方法
+	 private void putValues(String order_id, String order_content, String order_time,String order_more) {
+			map = new HashMap<String, String>();
+			map.put("order_id", order_id);
+			map.put("order_content", order_content);
+			map.put("order_time", order_time);
+			map.put("order_more", order_more);
+			list.add(map);
+		}
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<include 
+        layout="@layout/title_activity"
+        />
+	<com.example.ehs.widget.NPullToFreshContainer
+	    android:id="@+id/pulltofresh"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content">
+    	<LinearLayout 
+    	    android:layout_width="match_parent"
+    	    android:layout_height="wrap_content"
+    	    android:orientation="vertical">
+			<include layout="@layout/search"
+			    android:id="@+id/search_friends"/>
+			<LinearLayout 
+			    android:layout_width="match_parent"
+			    android:layout_height="60dp"
+			    android:orientation="horizontal"
+			    android:gravity="center_vertical">
+			    <Button 
+			        android:id="@+id/group"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:text="@string/group"
+			        android:textSize="@dimen/medium_text"
+			        android:layout_weight="1"/>
+			    <Button 
+			        android:id="@+id/disscus"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:text="@string/discuss"
+			        android:textSize="@dimen/medium_text"
+			        android:layout_weight="1"/>
+			    <Button 
+			        android:id="@+id/service"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:text="@string/service"
+			        android:textSize="@dimen/medium_text"
+			        android:layout_weight="1"/>
+			</LinearLayout>
+			<ExpandableListView android:id="@+id/main_expand_list"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:cacheColorHint="#00000000"/>
+		
+			<ListView android:id="@+id/main_invite_list"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:cacheColorHint="#00000000"/>
+		</LinearLayout>
+	</com.example.ehs.widget.NPullToFreshContainer>
+
+</LinearLayout>

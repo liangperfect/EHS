@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:gravity="center_vertical"
+     android:padding="8dip"
+     >
+    <ImageView 
+        android:layout_width="@dimen/avatar_width"
+     	android:layout_height="@dimen/avatar_height"
+     	android:layout_alignParentLeft="true"
+     	android:id="@+id/crowd_avater"
+     	android:scaleType="fitXY"
+     	android:src="@drawable/default_avatar"
+     	android:layout_marginRight="8dip"
+        />
+    <LinearLayout 
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical">
+     <TextView
+         android:id="@+id/crowd_name"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:singleLine="true"
+         android:text="群名"
+         android:textColor="@color/black"
+         android:textSize="@dimen/medium_text" 
+         android:layout_weight="1"/>
+     <TextView 
+         android:id="@+id/crowd_id"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:text="群号"
+         android:textColor="@color/black"
+         android:textSize="@dimen/medium_text"/>   
+    </LinearLayout>      
+</LinearLayout>

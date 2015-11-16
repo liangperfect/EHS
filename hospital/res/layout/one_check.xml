@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <include layout="@layout/title_activity"/>
+    <TextView
+        android:id="@+id/one_check_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="11"
+        android:textSize="@dimen/medium_text"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="10dp"
+        android:singleLine="false"/>
+    <LinearLayout 
+    		android:layout_width="match_parent"
+    		android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+   			android:orientation="horizontal" >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="检查内容："
+        android:textSize="@dimen/medium_text"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:singleLine="false"/>
+     <TextView
+        android:id="@+id/one_check_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="11"
+        android:textSize="@dimen/medium_text"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:singleLine="false"/>
+     </LinearLayout>"
+
+</LinearLayout>

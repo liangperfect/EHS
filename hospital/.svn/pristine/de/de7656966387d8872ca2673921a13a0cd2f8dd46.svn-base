@@ -1,0 +1,29 @@
+package com.example.ehs.query;
+
+import com.example.ehs.R;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+
+public class DoctorWordsDetailActivity extends Activity{
+	private TextView titleView;
+	private Button backView;
+	private TextView timeView;
+	private TextView contentView;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.doctor_words_detail);
+		
+		init();
+	}
+
+	private void init() {
+		titleView = (TextView)findViewById(R.id.title);
+		
+	}
+
+}

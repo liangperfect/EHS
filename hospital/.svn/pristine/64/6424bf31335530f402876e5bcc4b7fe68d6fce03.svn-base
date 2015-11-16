@@ -1,0 +1,82 @@
+package com.example.ehs.hospital;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.ehs.R;
+import com.example.ehs.utils.HttpUtil;
+/*
+ * 医院简介模块，可以参照“应用简介模块---AboutAppActivity”
+ * */
+public class AboutHospitalActivity extends Activity{
+
+	private ImageView imageHospital;
+	private TextView testViewabouthospital;
+	
+	String queryStr =null;
+	String aboutHospital=null;
+	String info = null;
+	String name = null;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.about_hospital);
+		imageHospital = (ImageView)findViewById(R.id.hospitalimage);
+		testViewabouthospital = (TextView)findViewById(R.id.TestViewabouthospital);
+		new Thread(){
+			 @Override
+			 public void run(){
+				 //你要执行的方法
+				 queryStr = query();
+				 //执行完毕后给handler发送一个空消息
+				 handler.sendEmptyMessage(0);
+			 }
+		}.start();
+
+	}
+	//定义Handler对象
+	private Handler handler =new Handler(){
+	 @Override
+	 //当有消息发送出来的时候就执行Handler的这个方法
+	public void handleMessage(Message msg){
+		 super.handleMessage(msg);
+		 //处理UI
+	 		doThings(queryStr);
+	 	}
+	};
+	private String query() {
+		String url = HttpUtil.BASE_URL+"doctor/servlet?Method=publicity";
+		return HttpUtil.queryStringForPost(url);
+	}
+	private String doThings(String queryStr) {
+		String result = null;
+		JSONObject object = null;
+		try {
+			JSONObject json= new JSONObject(queryStr);
+			result = json.getString("msg");
+			System.out.println("result="+result);
+			if(result.equals("success")){
+				object = json.getJSONObject("hospital");
+				info = object.getString("hospital_intro");
+				name = object.getString("hospital_name");
+				System.out.println("info="+info+"\n"+"name="+name);
+				aboutHospital = name+"\n"+info;
+				testViewabouthospital.setText(aboutHospital);
+			}else{
+				Toast.makeText(AboutHospitalActivity.this, "获取医院信息失败！", Toast.LENGTH_SHORT).show();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			result = "fail";
+		}
+		return result;
+	}
+}
